@@ -26,11 +26,26 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       
-    - name: Build with Gradle
+    - name: Build smali
       run: ./gradlew smali:fatJar
+      
+    - name: Build baksmali
+      run: ./gradlew baksmali:fatJar
+
+    - name: Get current date
+      id: date
+      run: echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+      
+    - name: Create ZIP archive
+      run: |
+        mkdir -p artifacts
+        cp smali/build/libs/*.jar artifacts/
+        cp baksmali/build/libs/*.jar artifacts/
+        cd artifacts
+        zip -r ../smali-${{ steps.date.outputs.date }}.zip ./*
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: smali-fat-jar
-        path: smali/build/libs/*.jar
+        name: smali-${{ steps.date.outputs.date }}
+        path: smali-${{ steps.date.outputs.date }}.zip
